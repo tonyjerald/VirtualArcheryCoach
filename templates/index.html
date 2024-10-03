@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Archery Coach</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-custom {
+            background-color: #5cb85c;
+            color: white;
+        }
+        .btn-custom:hover {
+            background-color: #4cae4c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h2>Virtual Archery Coach</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <img src="https://sigmoidal.ai/wp-content/uploads/2023/07/Pose-Landmarker-Model-600x303.jpg" class="img-thumbnail" alt="Pose IDs" style="max-width: 80%;">
+                        </div>
+                        <form action="/upload" method="POST" enctype="multipart/form-data" width="50">
+                            <!-- File Upload -->
+                            <div class="form-group">
+                                <label for="file" class="font-weight-bold">Upload your video <span class="text-danger">*</span> </label>
+                                <input type="file" class="form-control-file" id="file" name="file" accept="video/*" required>
+                            </div>
+
+                            <!-- Frames Per Second Input -->
+                            <div class="form-group">
+                                <label for="frames_per_second" class="font-weight-bold">Frames Per Second<span class="text-danger">*</span> </label>
+                                <input name="frames_per_second" class="form-control" type="number" min="1" max="32" placeholder="Frames Per Second" required>
+                            </div>
+
+                            <!-- Colour Dropdown -->
+                            <div class="form-group">
+                                <label for="colour" class="font-weight-bold">Colour <span class="text-danger">*</span> </label>
+                                <select name="colour" id="colour" class="form-control">
+                                    <option value="red">Red</option>
+                                    <option value="blue">Blue</option>
+                                </select>
+                            </div>
+
+                            <!-- Draw Dropdown -->
+                            <div class="form-group">
+                                <label for="draw" class="font-weight-bold">Draw <span class="text-danger">*</span> </label>
+                                <select name="draw" id="draw" class="form-control">
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                            </div>
+
+                            <!-- Multiple Angle Input -->
+                            <div class="form-group">
+                                <label class="font-weight-bold">Enter Three Position IDs To Draw Angle</label>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="position_id1">Position ID 1 <span class="text-danger">*</span> </label>
+                                        <input name="position_id1" class="form-control" type="number" min="0" max="32" placeholder="Position ID 1" required>
+                                    </div>
+
+                                    <div class="col">
+                                        <label for="position_id2">Position ID 2 <span class="text-danger">*</span> </label>
+                                        <input name="position_id2" class="form-control" type="number" min="0" max="32" placeholder="Position ID 2" required>
+                                    </div>
+
+                                    <div class="col">
+                                        <label for="position_id3">Position ID 3 <span class="text-danger">*</span> </label>
+                                        <input name="position_id3" class="form-control" type="number" min="0" max="32" placeholder="Position ID 3" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-custom mt-3">Upload Video</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,63 +1,61 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from flask_pymongo import PyMongo
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, Response
 from werkzeug.utils import secure_filename
 import os
 import cv2
-import numpy as np
-import tensorflow as tf
-from tensorflow.keras.models import load_model
+import PoseModule
 
 app = Flask(__name__)
-CORS(app)
 
-app.config["MONGO_URI"] = "mongodb://localhost:27017/archery"
-app.config['UPLOAD_FOLDER'] = 'uploads/'
-mongo = PyMongo(app)
+# Configure file upload
+UPLOAD_FOLDER = 'uploads/'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov'}
 
-# Load pre-trained models
-pose_estimation_model = load_model('original.mp4')
-feedback_model = load_model('path/to/feedback_model.h5')
+# Check if the file extension is allowed
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def analyze_video(video_path):
-    cap = cv2.VideoCapture(video_path)
-    frames = []
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-        frame = cv2.resize(frame, (368, 368))
-        frame = np.expand_dims(frame, axis=0)
-        frames.append(frame)
+# Route to the home page
+@app.route('/')
+def index():
 
-    frames = np.vstack(frames)
-    predictions = pose_estimation_model.predict(frames)
-    feedback = feedback_model.predict(predictions)
-    feedback_text = "Correct Technique" if feedback.mean() > 0.5 else "Incorrect Technique"
 
-    return feedback_text
+    return render_template('index.html')
+@app.route('/<name>')
+def redirect(name):
+    return render_template('index.html')
 
-@app.route('/analyze', methods=['POST'])
-def analyze():
-    if 'video' not in request.files:
-        return "No video file provided", 400
+# Route to handle file uploads
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    index()
+    if 'file' not in request.files:
+        return redirect(request.url)
+    file = request.files['file']
+    if file.filename == '':
+        return redirect(request.url)
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        # print(filepath)
+        file.save(filepath)
 
-    video = request.files['video']
-    filename = secure_filename(video.filename)
-    video_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    video.save(video_path)
+        draw = request.form['draw']
+        colour = request.form['colour']
+        frames_per_second = int(request.form['frames_per_second'])
+        position_id1 = int(request.form['position_id1'])
+        position_id2 = int(request.form['position_id2'])
+        position_id3 = int(request.form['position_id3'])
 
-    feedback = analyze_video(video_path)
+        return Response(PoseModule.main(filepath,colour, draw, position_id1, position_id2, position_id3, frames_per_second), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-    feedback_entry = {
-        "feedback": feedback,
-        "date": request.form.get("date", "Unknown date")
-    }
 
-    mongo.db.feedbacks.insert_one(feedback_entry)
-
-    return jsonify({"feedback": feedback})
+# Route to serve the uploaded files
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(debug=True)
